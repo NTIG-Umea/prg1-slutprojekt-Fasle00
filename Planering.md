@@ -1,14 +1,23 @@
 ## Project
 Connect 4
-## grejer
+## Todo
 * grid to play in
 * check if 4 connect
   * row
   * colum
   * diagonal upp
   * diagonal down
+* make marker
 * place marker
-* player check
+* turn check
+* check win
 
-## Planering
+## tekniker
+
+java canvas för att rita
+
+itterera över ett ```int[7][6]``` för att kolla om vinst
+
+en int för turns
+
 
