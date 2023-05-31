@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 import java.util.Arrays;
 
@@ -10,35 +11,35 @@ public class Slutprojekt extends Canvas implements Runnable{
     private Boolean running = false;
     private Thread thread;
 
-    private final int WIDTH = 1600;
+    private final int WIDTH = 1500;
     private final int HEIGHT = 900;
     private static final int COLUMNS = 7;
     private static final int ROWS = 6;
     private static int[][] grid = new int[COLUMNS][ROWS];
-    private final int TOKENWIDTH = 150;
-    private final int TOKENHEIGHT = 80;
+    private static final int TOKENWIDTH = 150;
+    private static final int TOKENHEIGHT = 90;
     private static int turn = 0;
-    private int pos = 0;
+    private static int pos = 0;
     private Boolean on = false;
     private int ending = 0;
-    private int currentH = 0;
-    private int endY = 0;
+    private int currentH = 95;
+    private int mouseX = 500;
+    private static final int XYOFFSET = 200;
+    private int yellowWinCount = 0;
+    private int redWinCount = 0;
 
     public Slutprojekt(){
         setSize(WIDTH,HEIGHT);
         JFrame frame = new JFrame();
         frame.add(this);
         this.addMouseListener(new MyMouseListner());
+        this.addMouseMotionListener(new MyMouseMotionListner());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
     public static void main(String[] args) {
-        for (int i = 0; i < COLUMNS; i++){
-            for (int j = 0; j < ROWS; j++){
-                grid[i][j] = 0;
-            }
-        }
+        resetBoard();
         Slutprojekt slutprojekt = new Slutprojekt();
         slutprojekt.start();
     }
@@ -46,18 +47,64 @@ public class Slutprojekt extends Canvas implements Runnable{
     public void draw(Graphics g){
         g.clearRect(0,0,WIDTH,HEIGHT);
         drawGrid(g);
+        dropToken(g);
+        g.setFont(new Font(null,1,20));
+
+        drawScore(g);
+
+        if (isWinning){
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setColor(Color.GREEN);
+            g2.setStroke(new BasicStroke(5));
+            g2.drawLine(winX1,winY1,winX2,winY2);
+            g.setColor(new Color(122, 58, 0));
+            g.fillRect(700,100,240,100);
+            g.setColor(Color.BLACK);
+            g.drawRect(700,100,240,100);
+
+            if (turn % 2 == 0){
+                g.drawString("Red player won",745,155);
+            }else{
+                g.drawString("Yellow player won",728,155);
+            }
+            g.drawString("Click here to play again",707,180);
+        } else {
+            hover(g);
+        }
+    }
+
+    public void drawScore(Graphics g){
+        g.setColor(Color.YELLOW);
+        g.fillOval(20,50,80,80);
+        g.setColor(Color.RED);
+        g.fillOval(1400,50,80,80);
+        g.setColor(Color.BLACK);
+        g.drawOval(20,50,80,80);
+        g.drawOval(1400,50,80,80);
+        g.drawString(String.valueOf(yellowWinCount),120,100);
+        g.drawString(String.valueOf(redWinCount),1370 - (String.valueOf(redWinCount).length() - 1) * 8,100);
+    }
+
+    public void dropToken(Graphics g){
         if (on){
             if (turn % 2 == 0){
                 g.setColor(Color.RED);
             }else {
                 g.setColor(Color.YELLOW);
             }
-            g.fillOval(pos * TOKENWIDTH + 200, currentH, TOKENWIDTH,TOKENHEIGHT);
+            g.fillOval(pos * TOKENWIDTH + XYOFFSET, currentH, TOKENWIDTH,TOKENHEIGHT);
         }
-        if (isWinning){
-            g.setColor(Color.GREEN);
-            g.drawLine((int)((winX1 + 0.5) * TOKENWIDTH) + 200,(int)((winY1 + 0.5) * TOKENHEIGHT) + 200,(int)((winX2 + 0.5) * TOKENWIDTH) + 200,(int)((winY2 + 0.5) * TOKENHEIGHT) + 200);
+    }
+
+    public void hover(Graphics g){
+        if (turn % 2 == 0){
+            g.setColor(Color.YELLOW);
+        }else {
+            g.setColor(Color.RED);
         }
+        g.fillOval(mouseX,95,TOKENWIDTH,TOKENHEIGHT);
+        g.setColor(Color.BLACK);
+        g.drawOval(mouseX,95,TOKENWIDTH,TOKENHEIGHT);
     }
     
     public void drawGrid(Graphics g){
@@ -66,7 +113,7 @@ public class Slutprojekt extends Canvas implements Runnable{
         Color red = Color.RED;
         Color yellow = Color.YELLOW;
         g.setColor(black);
-        g.fillRect(190,190,1070,500);
+        g.fillRect(190,190,COLUMNS * TOKENWIDTH + 20,ROWS * TOKENHEIGHT + 20);
         for (int y = 0; y < ROWS; y++){
             for (int x = 0; x < COLUMNS; x++){
                 if (grid[x][y] == 1){
@@ -76,137 +123,128 @@ public class Slutprojekt extends Canvas implements Runnable{
                 } else {
                     g.setColor(white);
                 }
-                g.fillOval(x * TOKENWIDTH + 200,y * TOKENHEIGHT + 200, TOKENWIDTH, TOKENHEIGHT);
+                g.fillOval(x * TOKENWIDTH + XYOFFSET,y * TOKENHEIGHT + XYOFFSET, TOKENWIDTH, TOKENHEIGHT);
             }
         }
     }
     
     private void update() {
         if (on){
-            int h;
-            if (currentH == 0){
-                h = 5;
+            if (currentH == 95){
+                int h = 5;
                 for (int i = 5; i >= 0; i--){
                     if (grid[pos][i] >= 1){
                         h--;
                     }
                 }
-                ending = (h) * TOKENHEIGHT + 200;
-                currentH = 150;
+                ending = (h) * TOKENHEIGHT + XYOFFSET;
             }
             if (currentH < ending){
                 currentH += 15;
             } else {
-                if (turn % 2 == 0){
-                    grid[pos][endY] = 1;
+                int player = turn % 2;
+                if (player == 0){
+                    grid[pos][(ending-XYOFFSET)/TOKENHEIGHT] = 1;
                 } else {
-                    grid[pos][endY] = 2;
-                }
-                currentH = 0;
+                    grid[pos][(ending-XYOFFSET)/TOKENHEIGHT] = 2;
+                } // places token in grid
+                currentH = 95;
                 on = false;
-                isWinning = checkWin();
+                if (checkWin()){
+                    if (player == 0) {
+                        redWinCount++;
+                    }else {
+                        yellowWinCount++;
+                    }
+                    isWinning = true;
+                }
             }
         }
     }
-    private static int winX1;
-    private static int winX2;
-    private static int winY1;
-    private static int winY2;
+    private int winX1, winX2, winY1, winY2;
     private static Boolean isWinning = false;
-    public static Boolean checkWin(){
+    public Boolean checkWin(){
         int player = turn % 2 + 1;
-        for (int x = COLUMNS - 1; x >= 0; x--){
-            for (int y = ROWS - 1; y >= 0; y--){
-                Boolean win = false;
-                try {
+        for (int x = 6; x >= 0; x--){
+            for (int y = 5; y >= 0; y--){
+                if (x > 2){
                     if (grid[x][y] == player && grid[x-1][y] == player && grid[x-2][y] == player && grid[x-3][y] == player){
-                        winX1 = x;
-                        winX2 = x-3;
-                        winY1 = winY2 = y;
-                        win = true;
+                            System.out.println("vänster");
+                            winX1 = (int)((x + 0.5) * TOKENWIDTH) + XYOFFSET;
+                            winX2 = (int)((x - 2.5) * TOKENWIDTH) + XYOFFSET;
+                            winY1 = winY2 = (int)((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
+                            return true;
+                        } // vågrät
+                    if (y > 2) {
+                        if (grid[x][y] == player && grid[x - 1][y - 1] == player && grid[x - 2][y - 2] == player && grid[x - 3][y - 3] == player) {
+                                System.out.println("vänster up");
+                                winX1 = (int) ((x + 0.5) * TOKENWIDTH) + XYOFFSET;
+                                winX2 = (int) ((x - 2.5) * TOKENWIDTH) + XYOFFSET;
+                                winY1 = (int) ((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
+                                winY2 = (int) ((y - 2.5) * TOKENHEIGHT) + XYOFFSET;
+                                return true;
+                            } // sne up
+                        if (grid[x][y] == player && grid[x][y - 1] == player && grid[x][y - 2] == player && grid[x][y - 3] == player) {
+                                System.out.println("ner");
+                                winY1 = (int)((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
+                                winY2 = (int)((y - 2.5) * TOKENHEIGHT) + XYOFFSET;
+                                winX1 = winX2 = (int)((x + 0.5) * TOKENWIDTH) + XYOFFSET;
+                                return true;
+                            } // lodrät
+                    } else {
+                        if (grid[x][y] == player && grid[x - 1][y + 1] == player && grid[x - 2][y + 2] == player && grid[x - 3][y + 3] == player) {
+                                System.out.println("vänster ner");
+                                winX1 = (int) ((x - 2.5) * TOKENWIDTH) + XYOFFSET;
+                                winX2 = (int) ((x + 0.5) * TOKENWIDTH) + XYOFFSET;
+                                winY1 = (int) ((y + 3.5) * TOKENHEIGHT) + XYOFFSET;
+                                winY2 = (int) ((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
+                                return true;
+                            } // sne ner
                     }
-                }catch (Exception e) { win = false; }
-
-                if (win) {
-                    System.out.println("x1: " + x + " y1: " + y);
-                    System.out.println("player: " + player);
-                    System.out.println(grid[x][y]);
-                    System.out.println(grid[x-1][y]);
-                    System.out.println(grid[x-2][y]);
-                    System.out.println(grid[x-3][y]);
-                    return true;
-                }
-
-                try {
-                    if (grid[x][y] == player && grid[x][y-1] == player && grid[x][y-2] == player && grid[x][y-3] == player){
-                        winY1 = y;
-                        winY2 = y-3;
-                        winX1 = winX2 = x;
-                        win = true;
-                    }
-                } catch (Exception e) { win = false; }
-
-                if (win) {
-                    System.out.println("x1: " + x + " y1: " + y);
-                    System.out.println("player: " + player);
-                    System.out.println(grid[x][y]);
-                    System.out.println(grid[x][y-1]);
-                    System.out.println(grid[x][y-2]);
-                    System.out.println(grid[x][y-3]);
-                    return true;
-                }
-
-                try {
-                    if (grid[x][y] == player && grid[x-1][y-1] == player && grid[x-2][y-2] == player && grid[x-3][y-3] == player){
-                        winX1 = x;
-                        winX2 = x - 3;
-                        winY1 = y;
-                        winY2 = y - 3;
-                        win = true;
-                    }
-                } catch (Exception e) { win = false; }
-
-                if (win) {
-                    System.out.println("x1: " + x + " y1: " + y);
-                    System.out.println("player: " + player);
-                    System.out.println(grid[x][y]);
-                    System.out.println(grid[x-1][y-1]);
-                    System.out.println(grid[x-2][y-2]);
-                    System.out.println(grid[x-3][y-3]);
-                    return true;
-                }
-
-                try {
-                    if (grid[x-3][y] == player && grid[x-2][y-1] == player && grid[x-1][y-2] == player && grid[x][y-3] == player){
-                        winX1 = x - 3;
-                        winX2 = x;
-                        winY1 = y;
-                        winY2 = y - 3;
-                        win = true;
-                    }
-                }catch (Exception e) { win = false; }
-
-                if (win) {
-                    System.out.println("x1: " + x + " y1: " + y);
-                    System.out.println("player: " + player);
-                    System.out.println(grid[x-3][y]);
-                    System.out.println(grid[x-2][y-1]);
-                    System.out.println(grid[x-1][y-2]);
-                    System.out.println(grid[x][y-3]);
-                    return true;
-                }
+                }else if (y > 2) {
+                    if (grid[x][y] == player && grid[x][y - 1] == player && grid[x][y - 2] == player && grid[x][y - 3] == player) {
+                        System.out.println("ner");
+                        winY1 = (int)((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
+                        winY2 = (int)((y - 2.5) * TOKENHEIGHT) + XYOFFSET;
+                        winX1 = winX2 = (int)((x + 0.5) * TOKENWIDTH) + XYOFFSET;
+                        return true;
+                    } // lodrät
+                } // lodrät om x <= 2
             }
         }
         return false;
     }
+    public static void resetBoard() {
+        for (int i = 0; i < COLUMNS; i++){
+            for (int j = 0; j < ROWS; j++){
+                grid[i][j] = 0;
+            }
+        }
+        isWinning = false;
+    }
 
+    public class MyMouseMotionListner implements MouseMotionListener {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            if (e.getX() >= XYOFFSET + (TOKENWIDTH / 2) && e.getX() <= 1250 - (TOKENWIDTH / 2)){
+                mouseX = e.getX() - (TOKENWIDTH / 2);
+            }
+        }
+    }
     public class MyMouseListner implements MouseListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (!on && !isWinning){
-                if (e.getX() >= 200 && e.getX() < 1250){
-                    pos = (int)((e.getX() - 200) / TOKENWIDTH);
+            if (!isWinning){
+                if (!on){
+                    if (e.getX() >= XYOFFSET && e.getX() < 1250){
+                    pos = (e.getX() - XYOFFSET) / TOKENWIDTH;
                     System.out.println(pos);
                     for (int i = 5; i >= 0; i--){
                         if (grid[pos][i] >= 1){
@@ -217,20 +255,21 @@ public class Slutprojekt extends Canvas implements Runnable{
                             System.out.println(turn);
                             if (turn % 2 == 0){
                                 System.out.println("i= " + i + "\npos= " + pos);
-                                endY = i;
                                 turn++;
                                 on = true;
                                 return;
-                            }else if (turn % 2 == 1){
+                            }else {
                                 System.out.println("i= " + i + "\npos= " + pos);
-                                endY = i;
                                 on = true;
                                 turn++;
                                 return;
                             }
                         }
                     }
+                    }
                 }
+            }else if (e.getX() > 700 && e.getX() < 900 && e.getY() > 100 && e.getY() < XYOFFSET){
+                resetBoard();
             }
         }
 
