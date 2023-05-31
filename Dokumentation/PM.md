@@ -1,10 +1,18 @@
-# Titel
+# Connect 4
 
-Författare och datum.
+Fabian Sigfridsson
+
+2023-05-30
 
 ## Inledning
 
 Här beskriver du kortfattat arbetets syfte/mål, arbetssätt, genomförande.
+
+Jag skulle göra ett fungerande Connect 4 över 4 veckor.
+Jag har jobbat med Java Canvas och använt MouseListeners.
+Jag har redan gjort ett liknande projekt tidigare så jag lyckades 
+få en fungerande version på endast 2 lektioner och har sedan dess 
+bara finputsat den och lagt en mer funktioner
 
 ## Bakgrund
 
@@ -13,6 +21,12 @@ Redovisa arbetets olika delar. Så att läsaren förstår vad du gjort och hur.
 Använd gärna bilder för att illustrera.
 
 För att lägga till bilder i markdown. Bilderna kan du ladda upp med Git som vanligt, länka dem med url eller filnamnet.
+
+Jag har använt Java Canvas för att måla.
+Jag har använt en integer matrix ````int[][]```` för att simulera alla 
+platser på brädet.
+Jag har 
+
 
 ```
 ![GitHub Logo](/images/logo.png)

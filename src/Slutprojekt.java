@@ -4,7 +4,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
-import java.util.Arrays;
 
 public class Slutprojekt extends Canvas implements Runnable{
     private BufferStrategy bs;
@@ -27,6 +26,7 @@ public class Slutprojekt extends Canvas implements Runnable{
     private static final int XYOFFSET = 200;
     private int yellowWinCount = 0;
     private int redWinCount = 0;
+    private Font myFont = new Font(null,1,20);
 
     public Slutprojekt(){
         setSize(WIDTH,HEIGHT);
@@ -48,7 +48,7 @@ public class Slutprojekt extends Canvas implements Runnable{
         g.clearRect(0,0,WIDTH,HEIGHT);
         drawGrid(g);
         dropToken(g);
-        g.setFont(new Font(null,1,20));
+        g.setFont(myFont);
 
         drawScore(g);
 
@@ -61,7 +61,6 @@ public class Slutprojekt extends Canvas implements Runnable{
             g.fillRect(700,100,240,100);
             g.setColor(Color.BLACK);
             g.drawRect(700,100,240,100);
-
             if (turn % 2 == 0){
                 g.drawString("Red player won",745,155);
             }else{
@@ -241,31 +240,22 @@ public class Slutprojekt extends Canvas implements Runnable{
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            System.out.println(e.getButton());
             if (!isWinning){
                 if (!on){
                     if (e.getX() >= XYOFFSET && e.getX() < 1250){
-                    pos = (e.getX() - XYOFFSET) / TOKENWIDTH;
-                    System.out.println(pos);
-                    for (int i = 5; i >= 0; i--){
-                        if (grid[pos][i] >= 1){
-                            if (i == 0){
-                                return;
-                            }
-                        }else {
-                            System.out.println(turn);
-                            if (turn % 2 == 0){
-                                System.out.println("i= " + i + "\npos= " + pos);
-                                turn++;
-                                on = true;
-                                return;
+                        pos = (e.getX() - XYOFFSET) / TOKENWIDTH;
+                        for (int i = 5; i >= 0; i--){
+                            if (grid[pos][i] >= 1){
+                                if (i == 0){
+                                    return;
+                                }
                             }else {
-                                System.out.println("i= " + i + "\npos= " + pos);
-                                on = true;
                                 turn++;
+                                on = true;
                                 return;
                             }
                         }
-                    }
                     }
                 }
             }else if (e.getX() > 700 && e.getX() < 900 && e.getY() > 100 && e.getY() < XYOFFSET){
@@ -275,7 +265,9 @@ public class Slutprojekt extends Canvas implements Runnable{
 
         @Override
         public void mousePressed(MouseEvent e) {
-
+            System.out.println(e.getButton());
+            System.out.println(e.getX());
+            System.out.println(e.getY());
         }
         @Override
         public void mouseReleased(MouseEvent e) {
