@@ -26,7 +26,7 @@ public class Slutprojekt extends Canvas implements Runnable{
     private static final int XYOFFSET = 200;
     private int yellowWinCount = 0;
     private int redWinCount = 0;
-    private Font myFont = new Font(null,1,20);
+    private final Font myFont = new Font(null,1,20);
 
     public Slutprojekt(){
         setSize(WIDTH,HEIGHT);
@@ -168,7 +168,6 @@ public class Slutprojekt extends Canvas implements Runnable{
             for (int y = 5; y >= 0; y--){
                 if (x > 2){
                     if (grid[x][y] == player && grid[x-1][y] == player && grid[x-2][y] == player && grid[x-3][y] == player){
-                            System.out.println("vänster");
                             winX1 = (int)((x + 0.5) * TOKENWIDTH) + XYOFFSET;
                             winX2 = (int)((x - 2.5) * TOKENWIDTH) + XYOFFSET;
                             winY1 = winY2 = (int)((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
@@ -176,7 +175,6 @@ public class Slutprojekt extends Canvas implements Runnable{
                         } // vågrät
                     if (y > 2) {
                         if (grid[x][y] == player && grid[x - 1][y - 1] == player && grid[x - 2][y - 2] == player && grid[x - 3][y - 3] == player) {
-                                System.out.println("vänster up");
                                 winX1 = (int) ((x + 0.5) * TOKENWIDTH) + XYOFFSET;
                                 winX2 = (int) ((x - 2.5) * TOKENWIDTH) + XYOFFSET;
                                 winY1 = (int) ((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
@@ -184,7 +182,6 @@ public class Slutprojekt extends Canvas implements Runnable{
                                 return true;
                             } // sne up
                         if (grid[x][y] == player && grid[x][y - 1] == player && grid[x][y - 2] == player && grid[x][y - 3] == player) {
-                                System.out.println("ner");
                                 winY1 = (int)((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
                                 winY2 = (int)((y - 2.5) * TOKENHEIGHT) + XYOFFSET;
                                 winX1 = winX2 = (int)((x + 0.5) * TOKENWIDTH) + XYOFFSET;
@@ -192,7 +189,6 @@ public class Slutprojekt extends Canvas implements Runnable{
                             } // lodrät
                     } else {
                         if (grid[x][y] == player && grid[x - 1][y + 1] == player && grid[x - 2][y + 2] == player && grid[x - 3][y + 3] == player) {
-                                System.out.println("vänster ner");
                                 winX1 = (int) ((x - 2.5) * TOKENWIDTH) + XYOFFSET;
                                 winX2 = (int) ((x + 0.5) * TOKENWIDTH) + XYOFFSET;
                                 winY1 = (int) ((y + 3.5) * TOKENHEIGHT) + XYOFFSET;
@@ -202,7 +198,6 @@ public class Slutprojekt extends Canvas implements Runnable{
                     }
                 }else if (y > 2) {
                     if (grid[x][y] == player && grid[x][y - 1] == player && grid[x][y - 2] == player && grid[x][y - 3] == player) {
-                        System.out.println("ner");
                         winY1 = (int)((y + 0.5) * TOKENHEIGHT) + XYOFFSET;
                         winY2 = (int)((y - 2.5) * TOKENHEIGHT) + XYOFFSET;
                         winX1 = winX2 = (int)((x + 0.5) * TOKENWIDTH) + XYOFFSET;
@@ -240,7 +235,6 @@ public class Slutprojekt extends Canvas implements Runnable{
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            System.out.println(e.getButton());
             if (!isWinning){
                 if (!on){
                     if (e.getX() >= XYOFFSET && e.getX() < 1250){
@@ -265,9 +259,6 @@ public class Slutprojekt extends Canvas implements Runnable{
 
         @Override
         public void mousePressed(MouseEvent e) {
-            System.out.println(e.getButton());
-            System.out.println(e.getX());
-            System.out.println(e.getY());
         }
         @Override
         public void mouseReleased(MouseEvent e) {

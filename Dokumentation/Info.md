@@ -4,3 +4,4 @@ Här sprar du alla dokumentationsfiler. Skisser på Gui, grafik, flödesdiagram
 
 Jag har fixat bakgrunden och hålen i för mina tokens
 
+### Logg 2023-05-05:

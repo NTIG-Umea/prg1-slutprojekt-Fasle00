@@ -25,8 +25,10 @@ För att lägga till bilder i markdown. Bilderna kan du ladda upp med Git som va
 Jag har använt Java Canvas för att måla.
 Jag har använt en integer matrix ````int[][]```` för att simulera alla 
 platser på brädet.
-Jag har 
-
+Om någon har vunnit så sparar jag koordinaterna för ändarna på linjen 
+och ritar en grön line igenom alla brickor för att hilighta den vinnande linjen
+ 
+![Connect 4 Red win](images/Connect_4_red_win.png)
 
 ```
 ![GitHub Logo](/images/logo.png)
@@ -38,6 +40,9 @@ Format: ![Alt Text](url)
 ## Positiva erfarenheter
 
 Här beskriver du vad som har gått bra i ditt projekt och analyserar varför. Hur ska du upprepa framgångarna.
+
+Det som har gått bra är egentligen hela projektet men mer specifikt
+algoritmen för att kolla om någon har vunnit. 
 
 ## Negativa erfarenheter
 
